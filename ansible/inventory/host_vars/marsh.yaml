@@ -1,0 +1,10 @@
+prompt:
+  colors:
+    primary: 184
+    secondary: 28
+    tertiary: 94
+  emoji: 🐸
+pve_host_index: 12
+pve_ip_address: 10.3.0.112
+pve_mac_address: de:fe:c8:03:00:70
+pve_vm_id: '112'

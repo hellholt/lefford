@@ -1,0 +1,110 @@
+# "Local" essentially always means `Greyjoy`, my personal Macbook Pro.
+#
+# My previous system was very agnostic, but in practice I didn't really end up
+# administering from any other machines, except on a lark.
+local:
+  hosts:
+    localhost:
+      ansible_connection: 'local'
+      # Thank $DEITY we're all on Python 3 now.  Right?  Right?
+      ansible_python_interpreter: 'python3'
+
+# Also a much simpler hierarchy than before. I used to have every single thing
+# in the house capable of running NetBSD listed below. No longer. The fact of
+# the matter is that I don't necessarily _want_ to administer every thing I can
+# possibly administer. Like my work computer, for instance.
+all:
+  children:
+
+    # Proxmox VE Nodes! Once we were three, but the energy expenditure just
+    # really couldn't be justified.
+    pve_nodes:
+      # I used to manage vars in group_vars and host_vars, because believe it
+      # or not my homelab was so complicated that this was actually warranted.
+      # It's no longer warranted.
+      vars:
+        # Proxmox VE is somewhat unusual in that it doesn't create a sudo user
+        # right off the bat. I've created one at this point, manually, because
+        # that's best practice where I come from, but because of that quirk, I
+        # will leave `ansible_ssh_user` set to root.  Basically, I want to be
+        # able to (at least theoretically) to take a stock Proxmox install to
+        # my desired configuration.
+        ansible_ssh_user: 'root'
+        # A way of easily determining from the machine in question which role
+        # it takes.
+        pve_role: 'node'
+      # Only one. 🪦 RIP in peace Ryswell and Celtigar, you flew too close to
+      # the sun.
+      hosts:
+        # This very machine.
+        lefford:
+
+    # LXC containers running on Proxmox. These are fairly light, inexpensive,
+    # and performant. LXC containers are not fully isolated from the host and
+    # are somewhat limited in other ways, so they're not always a great choice.
+    # But if I just want to try out an app or stack or something else, they're
+    # great.
+    pve_lxc:
+      vars:
+        ansible_ssh_user: 'nathan'
+        pve_role: 'lxc'
+      hosts:
+        ambrose:
+        blackbar:
+        caron:
+        donniger:
+        estren:
+        fenn:
+        gaunt:
+        harlton:
+        ironsmith:
+        justman:
+
+    # I used to run K8s on LXC containers.  It was a nontrivial undertaking but
+    # rewarding.  That said, I don't think the resulting clusters really could
+    # be said to follow best practices; they arguably introduced some subpar
+    # security configuration into the host.  Maybe K8s on LXC will be workable
+    # at some point, but I think I'll just make VMs now.
+    pve_k8s:
+      vars:
+        ansible_ssh_user: 'nathan'
+        pve_role: 'k8s'
+      children:
+        # Control Plane hosts. I'm more interested in being able to create and
+        # destroy the cluster on a whim than I am in actual high availability,
+        # so one CP will suffice.
+        pve_k8s_cp:
+          vars:
+            pve_k8s_role: 'control_plane'
+          hosts:
+            kettleblack:
+        # Node hosts.  I think three is a reasonable number.  This is a single
+        # machine I'm running everything on, and not exactly a top-of-the-line
+        # machine.
+        pve_k8s_workers:
+          vars:
+            pve_k8s_role: 'worker'
+          hosts:
+            lipps:
+            marsh:
+            norridge:
+
+    # Other KVM VMs.  I want to keep them separate from the Kubernetes VMs as I
+    # don't want to risk mistargeting them and destroying the cluster.  Their
+    # main purpose is to be deeply flexible, so if I want to run FreeBSD or
+    # OpnSense or do Linux From Scratch, etc, I can.  Or even... *gasp*... run
+    # Windows.
+    pve_kvm:
+      vars:
+        ansible_ssh_user: 'nathan'
+        pve_role: 'kvm'
+      hosts:
+        orkwood:
+        prester:
+        quagg:
+        reed:
+        shawney:
+        tudbury:
+        upcliff:
+        varner:
+        wode:
