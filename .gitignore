@@ -1,5 +1,7 @@
 # Local .terraform directories
 **/.terraform/*
+terraform/files/tmp/
+!terraform/files/tmp/.gitkeep
 
 # .tfstate files
 *.tfstate

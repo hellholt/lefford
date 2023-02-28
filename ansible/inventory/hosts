@@ -98,14 +98,16 @@ all:
         ansible_ssh_user: 'nathan'
         pve_role: 'k8s'
       children:
-        # Control Plane hosts. I'm more interested in being able to create and
-        # destroy the cluster on a whim than I am in actual high availability,
-        # so one CP will suffice.
+        # Control Plane hosts. I am trying to get more comfortable with the
+        # High-Availability aspects here, so while it would be convenient to
+        # just have one control-plane node, I'm creating three.
         pve_k8s_cp:
           vars:
             pve_k8s_role: 'control_plane'
           hosts:
             kettleblack:
+            lipps:
+            marsh:
         # Node hosts.  I think three is a reasonable number.  This is a single
         # machine I'm running everything on, and not exactly a top-of-the-line
         # machine.
@@ -113,22 +115,20 @@ all:
           vars:
             pve_k8s_role: 'worker'
           hosts:
-            lipps:
-            marsh:
             norridge:
+            orkwood:
+            prester:
 
     # Other KVM VMs.  I want to keep them separate from the Kubernetes VMs as I
     # don't want to risk mistargeting them and destroying the cluster.  Their
     # main purpose is to be deeply flexible, so if I want to run FreeBSD or
     # OpnSense or do Linux From Scratch, etc, I can.  Or even... *gasp*... run
-    # Windows.
+    # Windows.  Seven should be more than enough.
     pve_kvm:
       vars:
         ansible_ssh_user: 'nathan'
         pve_role: 'kvm'
       hosts:
-        orkwood:
-        prester:
         quagg:
         reed:
         shawney:

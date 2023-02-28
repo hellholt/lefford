@@ -16,3 +16,4 @@ pve_rootfs_size: 16G
 pve_option_unprivileged: true
 pve_option_onboot: true
 pve_option_start: true
+pve_cores: 4
