@@ -6,20 +6,12 @@
 
 Please feel free to read through these files; although they're not likely to be *directly* useful to you, they might help you with your own homelab :slightly_smiling_face:!
 
-## Infrastructure
+Infrastructure was initially managed through [Terraform](https://terraform.io/); I liked the idea of managing the infrastructure with Terraform and configuration with [Ansible](https://ansible.com/).  Alas, it was not to be; I did not find the Proxmox provider to be reliable under Terraform.  So ultimately, I find myself managing both through Ansible.
 
-Infrastructure is managed using [Terraform](https://www.terraform.io).  See [`terraform`](./terraform/README.md) for details.
-
-### Overview
+## Overview
 
 - [**Hellholt**](https://github.com/hellholt/): The Homelab as a whole.
   - [**Lefford**](https://github.com/hellholt/lefford/): Lefford, my HCI server.
     - [**Karhold**](https://github.com/hellholt/karhold/): Karhold, a Kubernetes cluster running on LXC containers and managed via Argo CD.
     - [**Longtable**](https://github.com/hellholt/longtable/): Longtable, a Nomad cluster running on QEMU VMs.
-
-## Configuration
-
-Configuration is managed using [Ansible](https://www.ansible.com).  See [`ansible`](./ansible/README.md) for details.
-
- Various systems, including some not managed via Terraform (such as my laptop, some Raspberry Pis, etc) use various elements of configuration that can be managed here.
 
