@@ -39,6 +39,34 @@ all:
         # This very machine.
         lefford:
 
+    # All PVE hosts.  This just creates an easy way of referring to _all_ of
+    # the hosts, as opposed to the node.
+    pve_hosts:
+      hosts:
+        ambrose:
+        blackbar:
+        caron:
+        donniger:
+        estren:
+        fenn:
+        gaunt:
+        harlton:
+        ironsmith:
+        justman:
+        kettleblack:
+        lipps:
+        marsh:
+        norridge:
+        orkwood:
+        prester:
+        quagg:
+        reed:
+        shawney:
+        tudbury:
+        upcliff:
+        varner:
+        wode:
+
     # LXC containers running on Proxmox. These are fairly light, inexpensive,
     # and performant. LXC containers are not fully isolated from the host and
     # are somewhat limited in other ways, so they're not always a great choice.

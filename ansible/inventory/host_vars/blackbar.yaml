@@ -8,3 +8,11 @@ pve_host_index: 1
 pve_ip_address: 10.3.0.101
 pve_mac_address: de:fe:c8:03:00:65
 pve_vm_id: '101'
+pve_lxc_template: "local:vztmpl/ubuntu-22.10-standard_22.10-1_amd64.tar.zst"
+pve_vm_name: 'ambrose'
+pve_swap: 512
+pve_memory: 16384
+pve_rootfs_size: 16G
+pve_option_unprivileged: true
+pve_option_onboot: true
+pve_option_start: true

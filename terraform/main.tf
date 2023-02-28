@@ -30,6 +30,11 @@ variable "proxmox_api_password" {
   sensitive = true
 }
 
+variable "client_ssh_pub_key" {
+  type      = string
+  sensitive = false
+}
+
 provider "onepassword" {
   url   = "https://1password-connect-api.lefford.hellholt.net"
   token = var.onepassword_api_token
@@ -43,18 +48,40 @@ provider "proxmox" {
 
 }
 
-resource "proxmox_lxc" "ambrose" {
+data "external" "ansible_inventory" {
+  program = ["python3", "${path.module}/scripts/collect_ansible_inventory.py"]
+  query = {
+    inventory_file = "${path.module}/../ansible/inventory/hosts"
+    host_vars_dir  = "${path.module}/../ansible/inventory/host_vars/"
+    output_file    = "${path.module}/ansible_inventory.tmp.yaml"
+  }
+}
+
+locals {
+  ansible_inventory = jsondecode(data.external.ansible_inventory.result.result)
+  pve_lxc_hosts     = local.ansible_inventory.all.children.pve_lxc.hosts
+  pve_lxc_host_names = toset(keys(local.pve_lxc_hosts))
+  // pve_k8s_cp_hosts = [yamldecode(data.yaml_decode.merged_inventory).all.children.pve_k8s.children.pve_k8s_cp.hosts]
+  // pve_k8s_worker_hosts = [yamldecode(data.yaml_decode.merged_inventory).all.children.pve_k8s.children.pve_k8s_workers.hosts]
+  // pve_kvm_hosts = [yamldecode(data.yaml_decode.merged_inventory).all.children.pve_kvm.hosts]
+  // host_data = yamldecode(data.yaml_decode.merged_inventory).all.children.pve_hosts.hosts
+}
+
+resource "proxmox_lxc" "lxc_hosts" {
+  for_each        = toset(local.pve_lxc_host_names)
   target_node     = "lefford"
-  hostname        = "ambrose"
-  ostemplate      = "local:vztmpl/ubuntu-22.10-standard_22.10-1_amd64.tar.zst"
-  unprivileged    = false
-  onboot          = true
-  start           = true
-  swap            = 512
+  hostname        = each.key
+  ostemplate      = local.pve_lxc_hosts[each.key].pve_lxc_template
+  unprivileged    = local.pve_lxc_hosts[each.key].pve_option_unprivileged
+  onboot          = local.pve_lxc_hosts[each.key].pve_option_onboot
+  start           = local.pve_lxc_hosts[each.key].pve_option_start
+  swap            = local.pve_lxc_hosts[each.key].pve_swap
+  memory          = local.pve_lxc_hosts[each.key].pve_memory
   password        = var.proxmox_api_password
   ssh_public_keys = <<-EOT
-    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDDl4yAh6KtLO0E6/faWBt3LxMCVMXXooGqUBm+63XI6ckHtt8jEBh1XgzMYLWqpoCpt69uk131HUrzFjXl1kDJ8Ttqx/CvakJkMv/iJ2Ofzjx0NVHr46/tcDvpDyDYMcY6kj1ZjvfJfuh1OSdyeS/VfXsyIIj3GlnxiCugyg+ocHXjMqyCerxgDJGbXck5aip7sAcHvKIAAYGAlt6WN6398SbFmdKg3Y0H+AxWm/4HvKuecC1oRvBVtXfQoASWKkaEuiNOWT5WREazxAAJqWnuzKTk5nWPjiYuC4pvUPPyfncoRBrutodTJoZ5QYuKfPoHgFz6s0lJKi2qTXm4FSJyQ7ZyKLnFw1Rfj2EhG7TytadcvqbbPw7TVlhKFjnebYC8A4zgBCRXlZLfQBSjbrh0WOPh5Rw1pqdX0jLTYl3rqnSta1EubLmzNuvBypO6I69tdS0OUr6DTYomZha95A/Qb1vZWrBXABPrzs4x8t6ItnDAoIchaxuljFpCqasRnf7C7IaitjOFWAproMtDlqg+1Lyu5gAfK3b3S1V8T9y2Xp2oQ1kcWEb1fkk0o9KFN9g3xDWUzSHWk/vLZVGzTBEceYqMTYYqhNjWje8e1m9HEEQXi+QNTWJx1FuZmjAHPeALb3JgDOFZoJt0gD4P4QgeKYpkoAvIVkOjXXKHTgiytQ== nathan@greyjoy
+    ${var.client_ssh_pub_key}
   EOT
+  vmid            = local.pve_lxc_hosts[each.key].pve_vm_id
 
   features {
     fuse    = true
@@ -64,15 +91,16 @@ resource "proxmox_lxc" "ambrose" {
 
   rootfs {
     storage = "leo"
-    size    = "8G"
+    size    = local.pve_lxc_hosts[each.key].pve_rootfs_size
   }
 
   network {
     name   = "eth0"
     bridge = "vmbr0"
-    hwaddr = "de:fe:c8:03:00:64"
+    hwaddr = local.pve_lxc_hosts[each.key].pve_mac_address
     ip     = "dhcp"
     ip6    = "auto"
   }
+
 }
 
