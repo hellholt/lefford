@@ -4,6 +4,8 @@
 
 **Lefford** is a Dell R720XD server with 384GB RAM and a ~42TB RAIDZ2 volume running Proxmox.  It's also the core of my homelab, which is more broadly referred to as [Hellholt](https://github.com/hellholt/), after some substantial downsizing in early 2023.
 
+Please feel free to read through these files; although they're not likely to be *directly* useful to you, they might help you with your own homelab :slightly_smiling_face:!
+
 ## Infrastructure
 
 Infrastructure is managed using [Terraform](https://www.terraform.io).  See [`terraform`](./terraform/README.md) for details.
