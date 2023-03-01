@@ -1,0 +1,56 @@
+---
+- name: 'Enable kernel modules.'
+  ansible.builtin.copy:
+    content: "{{ spn_module_name }}"
+    dest: "/etc/modules-load.d/{{ spn_module_name }}.conf"
+    mode: 0600
+  loop:
+    - 'vfio'
+    - 'vfio_iommu_type1'
+    - 'vfio_pci'
+    - 'vfio_virqfd'
+  loop_control:
+    loop_var: 'spn_module_name'
+  register: 'modules_load_d'
+
+- name: 'Modprobe kernel modules.'
+  community.general.modprobe:
+    name: "{{ spn_module_name }}"
+  loop:
+    - 'vfio'
+    - 'vfio_iommu_type1'
+    - 'vfio_pci'
+    - 'vfio_virqfd'
+  loop_control:
+    loop_var: 'spn_module_name'
+
+- name: 'Blacklist certain kernel modules to support PCI passthrough.'
+  ansible.builtin.copy:
+    dest: '/etc/modprobe.d/blacklist.conf'
+    content: |
+      blacklist radeon
+      blacklist nouveau
+      blacklist nvidia
+    owner: 'root'
+    group: 'root'
+    mode: 0755
+  register: 'modules_blacklist'
+
+- name: 'Enable PCI IDs for PCI passthrough.'
+  ansible.builtin.copy:
+    dest: '/etc/modprobe.d/vfio.conf'
+    content: "options vfio-pci ids={{ pci_passthrough_ids | join(',') }} disable_vga=1"
+  when: 'pci_passthrough_ids | length > 0'
+
+- name: 'Copy ROM to destination.'
+  ansible.builtin.copy:
+    dest: '/usr/share/kvm/AsusGtx1050TiPatched.rom'
+    src: "{{ role_path }}/files/roms/GTX1050TiPhoenixPatched.rom"
+    owner: 'root'
+    group: 'root'
+    mode: 0755
+
+- name: 'Update Initramfs.'
+  ansible.builtin.shell:
+    cmd: 'update-initramfs -u -k all'
+  when: 'modules_load_d.changed or modules_blacklist.changed'

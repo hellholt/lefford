@@ -1,0 +1,15 @@
+---
+
+# PCI IDs for passthrough.
+pci_passthrough_ids: []
+
+# Apt packages.
+default_apt_packages: []
+
+# Pip packages.
+default_pip_packages: []
+
+# Prefix to FS path mounted to hosts.
+pve_local_share_prefix: null
+# Hosts that exist on this Proxmox node (and can thus mount local shares).
+pve_local_share_hosts: []

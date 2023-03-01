@@ -1,0 +1,172 @@
+# This should always be 'python3' because it's 2023.
+ansible_python_interpreter: 'python3'
+
+# An SSH public key that I inject into newly created hosts for admin purposes.
+admin_ssh_public_keys:
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDDl4yAh6KtLO0E6/faWBt3LxMCVMXXooGqUBm+63XI6ckHtt8jEBh1XgzMYLWqpoCpt69uk131HUrzFjXl1kDJ8Ttqx/CvakJkMv/iJ2Ofzjx0NVHr46/tcDvpDyDYMcY6kj1ZjvfJfuh1OSdyeS/VfXsyIIj3GlnxiCugyg+ocHXjMqyCerxgDJGbXck5aip7sAcHvKIAAYGAlt6WN6398SbFmdKg3Y0H+AxWm/4HvKuecC1oRvBVtXfQoASWKkaEuiNOWT5WREazxAAJqWnuzKTk5nWPjiYuC4pvUPPyfncoRBrutodTJoZ5QYuKfPoHgFz6s0lJKi2qTXm4FSJyQ7ZyKLnFw1Rfj2EhG7TytadcvqbbPw7TVlhKFjnebYC8A4zgBCRXlZLfQBSjbrh0WOPh5Rw1pqdX0jLTYl3rqnSta1EubLmzNuvBypO6I69tdS0OUr6DTYomZha95A/Qb1vZWrBXABPrzs4x8t6ItnDAoIchaxuljFpCqasRnf7C7IaitjOFWAproMtDlqg+1Lyu5gAfK3b3S1V8T9y2Xp2oQ1kcWEb1fkk0o9KFN9g3xDWUzSHWk/vLZVGzTBEceYqMTYYqhNjWje8e1m9HEEQXi+QNTWJx1FuZmjAHPeALb3JgDOFZoJt0gD4P4QgeKYpkoAvIVkOjXXKHTgiytQ== nathan@greyjoy'
+
+admin_ssh_public_key: "{{ admin_ssh_public_keys[0] }}"
+
+# A clean, consistent version of the hostname.
+clean_hostname: "{{ inventory_hostname | splitext | first | lower }}"
+
+# Just the name of the project as a whole.  This will be used in a few places.
+project_name: 'lefford'
+
+# Calculated IPv4 address.  Doesn't always work, usually does.
+ipv4_address: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }}"
+
+# Default web options for reverse proxy.
+web:
+  protocol: 'https'
+  port: 443
+  additional_backends: []
+
+# Data structure for my personal preferences.
+my:
+  name:
+    lower: 'nathan'
+    full: 'Nathan Douglas'
+  email:
+    github: 'github@darkdell.net'
+  local:
+    timezone: 'America/New_York'
+  domains:
+    private: 'hellholt.net'
+    personal: 'bitterbridge.net'
+    public: 'darkdell.net'
+
+# Data structure of the vault.
+# vault:
+#   easy_password: <string>
+#   proxmox:
+#     nodes:
+#       ryswell:
+#         api:
+#           username: <string>
+#           password: <string>
+
+# Some crap that appears to be too cumbersome to do automatically.
+k8s_cluster_names:
+  - 'karhold'
+
+
+# A private domain name.
+private_domain_name: "{{ my.domains.private }}"
+# A personal domain name.
+personal_domain_name: "{{ my.domains.personal }}"
+
+# I have three domain names I use for networks:
+# - "private", which resolves to LAN IP addresses (e.g. 192.168.x.x).
+# - "personal", which resolves to my home IP address (e.g. 69.420.x.x).
+# - "public", which is hosted in the cloud and hosts my blog, etc.
+#
+# Some FQDNs are used only internally, some only externally, some both,
+# and some neither.  They're easy to calculate and populate.
+#
+# In this context, I don't really use my "public" domain name.
+
+# A "private" FQDN.
+host_private_fqdn: "{{ clean_hostname }}.{{ private_domain_name }}"
+# A "personal" FQDN.
+host_personal_fqdn: "{{ clean_hostname }}.{{ personal_domain_name }}"
+
+# Traefik directory.
+traefik_data_dir: '/mnt/host/traefik'
+
+# LetsEncrypt certificate resolver name.
+letsencrypt_private_domain_resolver: "{{ my.domains.private | splitext | first }}"
+
+# LetsEncrypt email address.
+letsencrypt_email_address:  "letsencrypt@{{ my.domains.private }}"
+
+# A normal (i.e. non-root) username.
+normal_user_name: "{{ my.name.lower }}"
+
+# Normal user home directory.
+normal_user_home: "/home/{{ normal_user_name }}"
+
+# Normal user stuff.
+normal_user_group: "{{ normal_user_name }}"
+normal_user_uid: '1000'
+normal_user_gid: '1000'
+
+# Dotfiles repository.
+dotfiles_repo_url: 'https://github.com/hellholt/dotfiles.git'
+
+# Explicitly set the hostname instead of e.g. "debian", "nug-dougs-macbook-pro," etc.
+explicitly_set_hostname: true
+
+# Some potential security risk, depending on what you run on the host.
+enable_passwordless_sudo: true
+
+# Create a non-root user.
+create_normal_user: true
+
+# This can take a while and should be avoided when possible.
+install_common_packages: true
+
+# My local timezone.
+local_timezone: "{{ my.local.timezone }}"
+
+# By default, use Ubuntu 22.04 as our template.
+default_lxc_template: 'ubuntu-22.04-standard_22.04-1_amd64.tar.zst'
+
+# Set the description to the description.
+description: "{{ ansible_description }}"
+
+# An ample mount, local storage for all LXC containers.
+default_lxc_mount: 'local-lvm:64,mp=/mnt/host,backup=1,size=64G'
+
+# Prefix to NFS path exported to k8s clusters.
+k8s_nfs_prefix: '/leo/kubernetes'
+
+# Easy password.
+easy_password: "{{ vault.easy_password }}"
+
+# The API username.
+pve_api_username: "{{ vault.proxmox.nodes[pve_node].api.username }}"
+
+# The API password.
+pve_api_password: "{{ vault.proxmox.nodes[pve_node].api.password }}"
+
+# Apt packages.
+default_apt_packages:
+  - 'apt-file'
+  - 'bc'
+  - 'build-essential'
+  - 'cargo'
+  - 'curl'
+  - 'ffmpeg'
+  - 'git'
+  - 'jq'
+  - 'libacl1-dev'
+  - 'libffi-dev'
+  - 'libssl-dev'
+  - 'mailutils'
+  - 'nfs-client'
+  - 'nfs-common'
+  - 'python3'
+  - 'python3-apt'
+  - 'python3-dev'
+  - 'python3-pip'
+  - 'python3-setuptools'
+  - 'python3-venv'
+  - 'rsync'
+  - 'sudo'
+
+# Pip packages.
+default_pip_packages:
+  - 'ansible'
+  - 'awscli'
+  - 'bcrypt'
+  - 'bdfr'
+  - 'boto3'
+  - 'docker'
+  - 'kubernetes'
+  - 'passlib'
+  - 'proxmoxer'
+  - 'requests'
+  - 'torrent_parser'
+  - 'typing_extensions'
+  - 'virtualenv'

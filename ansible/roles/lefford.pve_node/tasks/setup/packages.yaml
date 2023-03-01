@@ -1,0 +1,20 @@
+---
+- name: 'Allow release-info to change for APT repositories.'
+  ansible.builtin.command: 'apt-get update -y --allow-releaseinfo-change'
+  changed_when: no
+
+- name: 'Install Apt packages.'
+  ansible.builtin.apt:
+    name: "{{ default_apt_packages }}"
+    cache_valid_time: "{{ 3600 * 24 }}"
+
+- name: 'Make sure pip is at the latest version.'
+  ansible.builtin.pip:
+    name: 'pip'
+    state: 'forcereinstall'
+  changed_when: no
+
+- name: 'Install Pip packages.'
+  ansible.builtin.pip:
+    name: "{{ default_pip_packages }}"
+    extra_args: '--ignore-installed'

@@ -1,0 +1,24 @@
+---
+- name: 'Setup APT.'
+  ansible.builtin.include_tasks: 'setup/apt.yaml'
+
+- name: 'Setup Packages.'
+  ansible.builtin.include_tasks: 'setup/packages.yaml'
+
+- name: 'Setup AppArmor.'
+  ansible.builtin.include_tasks: 'setup/apparmor.yaml'
+
+- name: 'Setup Grub.'
+  ansible.builtin.include_tasks: 'setup/grub.yaml'
+
+- name: 'Setup Kernel Modules.'
+  ansible.builtin.include_tasks: 'setup/kernel_modules.yaml'
+
+- name: 'Setup PCI Passthrough.'
+  ansible.builtin.include_tasks: 'setup/pci_passthrough.yaml'
+
+- name: 'Setup Kubernetes Support.'
+  ansible.builtin.include_tasks: 'setup/kubernetes.yaml'
+
+- name: 'Setup Local Shares.'
+  ansible.builtin.include_tasks: 'setup/local_shares.yaml'

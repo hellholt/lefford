@@ -19,22 +19,8 @@ all:
     # Proxmox VE Nodes! Once we were three, but the energy expenditure just
     # really couldn't be justified.
     pve_nodes:
-      # I used to manage vars in group_vars and host_vars, because believe it
-      # or not my homelab was so complicated that this was actually warranted.
-      # It's no longer warranted.
-      vars:
-        # Proxmox VE is somewhat unusual in that it doesn't create a sudo user
-        # right off the bat. I've created one at this point, manually, because
-        # that's best practice where I come from, but because of that quirk, I
-        # will leave `ansible_ssh_user` set to root.  Basically, I want to be
-        # able to (at least theoretically) to take a stock Proxmox install to
-        # my desired configuration.
-        ansible_ssh_user: 'root'
-        # A way of easily determining from the machine in question which role
-        # it takes.
-        pve_role: 'node'
       # Only one. 🪦 RIP in peace Ryswell and Celtigar, you flew too close to
-      # the sun.
+      # the sun.  Vars defined in host_vars.
       hosts:
         # This very machine.
         lefford:

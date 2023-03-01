@@ -1,0 +1,26 @@
+---
+- name: 'Enable kernel modules.'
+  ansible.builtin.copy:
+    content: "{{ spn_module_name }}"
+    dest: "/etc/modules-load.d/{{ spn_module_name }}.conf"
+    mode: 0600
+  loop:
+    - 'br_netfilter'
+    - 'overlay'
+  loop_control:
+    loop_var: 'spn_module_name'
+  register: 'modules_load_d'
+
+- name: 'Modprobe kernel modules.'
+  community.general.modprobe:
+    name: "{{ spn_module_name }}"
+  loop:
+    - 'br_netfilter'
+    - 'overlay'
+  loop_control:
+    loop_var: 'spn_module_name'
+
+- name: 'Update Initramfs.'
+  ansible.builtin.shell:
+    cmd: 'update-initramfs -u -k all'
+  when: 'modules_load_d.changed'

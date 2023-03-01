@@ -1,0 +1,22 @@
+# Proxmox VE is somewhat unusual in that it doesn't create a sudo user right
+# off the bat. I've created one at this point, manually, because that's best
+# practice where I come from, but because of that quirk, I will leave 
+# `ansible_ssh_user` set to root. Basically, I want to be able to (at least
+# theoretically) to take a stock Proxmox install to my desired configuration.
+ansible_ssh_user: 'root'
+# A way of easily determining from the machine in question which role it takes.
+pve_role: 'node'
+# Settings for defining the prompt. This will be present for each of the hosts.
+prompt:
+  colors:
+    primary: 220
+    secondary: 32
+    tertiary: 58
+  emoji: ☀️
+# IP address of the host.  Of course.  Sorry, it just looked weird without a
+# comment.
+pve_ip_address: 10.3.0.2
+# Nvidia GPU for passing through to a VM, for a virtualized gaming server.
+pci_passthrough_ids:
+  - '10de:1c82'
+  - '10de:0fb9'

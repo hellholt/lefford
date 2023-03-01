@@ -1,0 +1,8 @@
+{
+  "name": "lefford",
+  "version": "0.0.1",
+  "description": "Bash scripts for dealing with Lefford.",
+  "scripts": [ "lefford.sh" ],
+  "global": "true",
+  "install": "make install"
+}

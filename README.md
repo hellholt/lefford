@@ -12,6 +12,11 @@ Infrastructure was initially managed through [Terraform](https://terraform.io/);
 
 - [**Hellholt**](https://github.com/hellholt/): The Homelab as a whole.
   - [**Lefford**](https://github.com/hellholt/lefford/): Lefford, my HCI server.
-    - [**Karhold**](https://github.com/hellholt/karhold/): Karhold, a Kubernetes cluster running on LXC containers and managed via Argo CD.
-    - [**Longtable**](https://github.com/hellholt/longtable/): Longtable, a Nomad cluster running on QEMU VMs.
+    - [**Karhold**](https://github.com/hellholt/karhold/): Karhold, a Kubernetes cluster running on LXC containers and managed via Argo CD.  I used to have multiple clusters, but TBH I never used any except the first, so... eh.
+    - [**Longtable**](https://github.com/hellholt/longtable/): Longtable, a Nomad cluster running on QEMU VMs.  I'm just getting into Nomad, so this isn't a thing yet.
 
+## Repository Structure
+
+- [📁**lefford**](./): You are here.
+  - [📁**ansible**](./ansible/): Ansible inventory, roles, etc.
+  - [📁**bash**](./bash/): A Bash script that makes it easier to administer Lefford.
