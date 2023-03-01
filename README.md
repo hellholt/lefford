@@ -17,6 +17,14 @@ Infrastructure was initially managed through [Terraform](https://terraform.io/);
 
 ## Repository Structure
 
-- [📁**lefford**](./): You are here.
-  - [📁**ansible**](./ansible/): Ansible inventory, roles, etc.
-  - [📁**bash**](./bash/): A Bash script that makes it easier to administer Lefford.
+- [📁**lefford/**](./): You are here.
+  - [📁**ansible/**](./ansible/): Ansible inventory, roles, etc.
+    - [📁**inventory/**](./ansible/inventory/): Inventory.
+      - [📁**group_vars/**](./ansible/inventory/group_vars/): Variables defined per group.
+        - [📁**all/**](./ansible/inventory/group_vars/all/): Variables that span all groups.
+          - [📄**vars.yaml**](./ansible/inventory/group_vars/all/vars.yaml): Shared variables for the whole thing.
+          - [📄**vault**](./ansible/inventory/group_vars/all/vault): Shared secrets, pls don't pwn me.
+      - [📁**host_vars/**](./ansible/inventory/host_vars/): Variables defined per-host.
+    - [📁**roles/**](./ansible/roles/): Custom roles developed for administration.
+      - [📁**lefford.pve_node/**](./ansible/roles/lefford.pve_node/): A desired state definition for Lefford itself.
+  - [📁**bash/**](./bash/): A Bash script to wrap Ansible in a friendly command.
