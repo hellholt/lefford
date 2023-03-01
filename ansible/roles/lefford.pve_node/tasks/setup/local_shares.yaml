@@ -3,7 +3,7 @@
   community.general.zfs:
     name: "{{ pve_local_share_prefix | regex_replace('^\\/', '') }}/{{ spn_local_hostname }}"
     state: 'present'
-  loop: "{{ pve_local_share_hosts }}"
+  loop: "{{ groups['pve_hosts'] }}"
   loop_control:
     index_var: 'spn_index'
     loop_var: 'spn_local_hostname'

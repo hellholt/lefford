@@ -1,0 +1,118 @@
+---
+- name: 'Create and start the container.'
+  delegate_to: "{{ pve_node }}"
+  become: yes
+  block:
+
+    - name: 'Download template if it does not already exist.'
+      community.general.proxmox_template:
+        node: "{{ pve_node }}"
+        api_user: "{{ pve_api_username }}"
+        api_password: "{{ pve_api_password }}"
+        api_host: "{{ pve_node }}"
+        storage: 'local'
+        content_type: 'vztmpl'
+        template: "{{ default_lxc_template }}"
+
+    - name: 'Ensure mountpoints exist on host.'
+      ansible.builtin.file:
+        path: "{{ pve_mountpoint_item.node_path }}"
+        state: 'directory'
+        mode: "{{ pve_mountpoint_item.perms | default('0755') }}"
+        owner: "{{ pve_mountpoint_item.uid | default('1000') }}"
+        group: "{{ pve_mountpoint_item.gid | default('1000') }}"
+      loop_control:
+        index_var: 'index'
+        loop_var: 'pve_mountpoint_item'
+      loop: "{{ pve_mountpoints | default([]) }}"
+
+    - name: 'Build mountpoints.'
+      ansible.builtin.set_fact:
+        pve_mountpoints_dict: "{{ pve_mountpoints_dict | combine({ 'mp' + ( index + 1 ) | string : pve_mountpoint_item.node_path + ',mp=' + pve_mountpoint_item.host_path }) }}"
+      loop_control:
+        index_var: 'index'
+        loop_var: 'pve_mountpoint_item'
+      loop: "{{ pve_mountpoints | default([]) }}"
+
+    - name: 'Create container.'
+      community.general.proxmox:
+        api_user: "{{ pve_api_username }}"
+        api_password: "{{ pve_api_password }}"
+        api_host: "{{ pve_node }}"
+        vmid: "{{ pve_vm_id }}"
+        node: "{{ pve_node }}"
+        cores: "{{ pve_cores }}"
+        memory: "{{ pve_memory_size }}"
+        swap: "{{ pve_swap_size }}"
+        password: "{{ pve_root_password }}"
+        hostname: "{{ clean_hostname }}"
+        mounts: "{{ pve_mountpoints_dict | to_json }}"
+        onboot: "{{ pve_onboot }}"
+        ostemplate: "{{ pve_template_path }}/{{ default_lxc_template }}"
+        description: "{{ description | default(clean_hostname) }}"
+        netif: '{"net0":"type=veth,name=eth0,ip=dhcp,bridge=vmbr0,firewall=1,hwaddr={{ pve_mac_address }}"}'
+        unprivileged: "{{ pve_unprivileged }}"
+        disk: "{{ lxc_storage }}:{{ pve_rootfs_size }}"
+        features: "{{ pve_features }}"
+        state: 'present'
+        storage: 'local'
+        pubkey: "{{ admin_ssh_public_key }}"
+        proxmox_default_behavior: 'no_defaults'
+        timeout: 600
+      register: 'result'
+      retries: 3
+      delay: 10
+      until: 'result is not failed'
+
+    - name: 'Append additional options to VM configuration.'
+      ansible.builtin.blockinfile:
+        path: "/etc/pve/lxc/{{ pve_vm_id }}.conf"
+        block: |
+          lxc.apparmor.profile: unconfined
+          lxc.apparmor.raw: mount,
+          lxc.cap.drop:
+          lxc.cgroup2.devices.allow: a
+          lxc.mount.auto: proc:rw sys:rw
+          lxc.mount.entry: /dev/kmsg dev/kmsg none defaults,bind,create=file
+        unsafe_writes: yes
+
+    - name: 'Start container.'
+      community.general.proxmox:
+        vmid: "{{ pve_vm_id }}"
+        api_user: "{{ pve_api_username }}"
+        api_password: "{{ pve_api_password }}"
+        api_host: "{{ pve_node }}"
+        state: 'started'
+        proxmox_default_behavior: 'no_defaults'
+        timeout: 600
+
+- name: 'Connect to the container.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Wait for connectivity.'
+      ansible.builtin.wait_for_connection:
+
+    - name: 'Gather facts.'
+      ansible.builtin.setup:
+
+    - name: 'Create an SSH key for root.'
+      community.crypto.openssh_keypair:
+        path: '~/id_rsa'
+        comment: "root@{{ clean_hostname }}"
+        owner: 'root'
+        group: 'root'
+        mode: 0600
+        regenerate: 'full_idempotence'
+        size: 4096
+        type: 'rsa'
+
+    - name: 'Set SSH keys for root account.'
+      ansible.posix.authorized_key:
+        user: 'root'
+        state: 'present'
+        key: "{{ pve_pubkey_item }}"
+      loop: "{{ admin_ssh_public_keys }}"
+      loop_control:
+        index_var: 'pve_pubkey_index'
+        loop_var: 'pve_pubkey_item'

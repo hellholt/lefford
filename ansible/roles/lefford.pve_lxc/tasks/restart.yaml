@@ -1,0 +1,12 @@
+---
+- name: 'Restart the container.'
+  delegate_to: "{{ pve_node }}"
+  community.general.proxmox:
+    api_user: "{{ pve_api_username }}"
+    api_password: "{{ pve_api_password }}"
+    api_host: "{{ pve_node }}"
+    vmid: "{{ pve_vm_id }}"
+    state: 'restarted'
+    force: yes
+    proxmox_default_behavior: 'no_defaults'
+    timeout: 600

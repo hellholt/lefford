@@ -1,0 +1,29 @@
+---
+- name: 'Gather facts.'
+  ansible.builtin.setup:
+
+- name: 'Detect when we are running Synology DSM.'
+  stat:
+    path: '/etc/synoinfo.conf'
+  register: 'synology_info_file'
+  when: '(ansible_distribution == "OtherLinux")'
+
+- name: 'Detect when we are running Proxmox.'
+  stat:
+    path: '/etc/pve'
+  register: 'proxmox_pve_directory'
+  when: '(ansible_distribution == "Debian")'
+
+- name: 'Set more facts.'
+  ansible.builtin.set_fact:
+    host_uses_apk: "{{ ansible_distribution == 'Alpine' }}"
+    host_uses_apt: "{{ ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' }}"
+    host_uses_homebrew: "{{ ansible_distribution == 'MacOSX' }}"
+    host_is_alpine: "{{ ansible_distribution == 'Alpine' }}"
+    host_is_raspbian: "{{ ansible_distribution == 'Debian' and 'id' in ansible_lsb and ansible_lsb.id == 'Raspbian' }}"
+    host_is_debian: "{{ ansible_distribution == 'Debian' }}"
+    host_is_ubuntu: "{{ ansible_distribution == 'Ubuntu' }}"
+    host_is_debian_based: "{{ ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' }}"
+    host_is_mac: "{{ ansible_distribution == 'MacOSX' }}"
+    host_is_proxmox: "{{ ansible_distribution == 'Debian' and proxmox_pve_directory.stat.exists }}"
+    host_is_synology: "{{ ansible_distribution == 'OtherLinux' and synology_info_file.stat.exists }}"

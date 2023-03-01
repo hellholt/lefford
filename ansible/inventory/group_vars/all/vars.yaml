@@ -4,6 +4,9 @@ ansible_python_interpreter: 'python3'
 # An SSH public key that I inject into newly created hosts for admin purposes.
 admin_ssh_public_keys:
   - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDDl4yAh6KtLO0E6/faWBt3LxMCVMXXooGqUBm+63XI6ckHtt8jEBh1XgzMYLWqpoCpt69uk131HUrzFjXl1kDJ8Ttqx/CvakJkMv/iJ2Ofzjx0NVHr46/tcDvpDyDYMcY6kj1ZjvfJfuh1OSdyeS/VfXsyIIj3GlnxiCugyg+ocHXjMqyCerxgDJGbXck5aip7sAcHvKIAAYGAlt6WN6398SbFmdKg3Y0H+AxWm/4HvKuecC1oRvBVtXfQoASWKkaEuiNOWT5WREazxAAJqWnuzKTk5nWPjiYuC4pvUPPyfncoRBrutodTJoZ5QYuKfPoHgFz6s0lJKi2qTXm4FSJyQ7ZyKLnFw1Rfj2EhG7TytadcvqbbPw7TVlhKFjnebYC8A4zgBCRXlZLfQBSjbrh0WOPh5Rw1pqdX0jLTYl3rqnSta1EubLmzNuvBypO6I69tdS0OUr6DTYomZha95A/Qb1vZWrBXABPrzs4x8t6ItnDAoIchaxuljFpCqasRnf7C7IaitjOFWAproMtDlqg+1Lyu5gAfK3b3S1V8T9y2Xp2oQ1kcWEb1fkk0o9KFN9g3xDWUzSHWk/vLZVGzTBEceYqMTYYqhNjWje8e1m9HEEQXi+QNTWJx1FuZmjAHPeALb3JgDOFZoJt0gD4P4QgeKYpkoAvIVkOjXXKHTgiytQ== nathan@greyjoy'
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDLL0rc3r2PmLbmdqOv/UxYz1JQC1YmvLdUYr5XkQ02lf1xodpcnnc+4I1l8fYtsBxMDQe1Bgm/XddCGWPLle0npKepuXgltDorQvtWX/P8qCTK1jtHBuqgvpwCsTliywbgeUu04anlZ8VjqH0dDf9O+8+cms3mPwK4CPumku446RKe7RfwVlOZdP8uhUt2tO/CGHifwbttzTJjjIwTyFPcNxFsMLV+zvU7UNRX8ir9V8m4gHfk+DpAeJQYoRR/agxxOSDVUFNbL7fchiatOAjL1Z6/p92JD2WJmUnNwWkg1tldm7ubBaaxhc6QNyJdZLITbI/WI8zHAeitdp+kn3wmmO/CFbe7Mpe4OIBmFdtp/fbsT0SCbJRQ2iuejZvyISZpAxpDYAaeoP+ED6DQ3BHVqtul0X9N8Q5fIz4nkNcSdvIsJjIjg3YgrdcsLmBIvzsWRc4/L4zHuW1X3VaMK4YvXMOzs2l7pT+bvN/AUsPLAcscJV5q2dUgjDwGNe5ZV/eDizsrrDsWtm9hsSKRqvEnTA47TvjJOsY1furZ29nzYEa06uIXBafJycbIWzJmoU1fpe17Q9WbcqkkGlB5hyjt0ztt5y9VSPwxeF4W3TC/wbFCTbJusqe6O3GJMVkFmc6kfi36EVyAoUNxswHyLT85fQ0ysT+tA5Et+ByfPltr0Q== nathan@lefford'
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDTE+zGr4sFUjUTYO/OekeMnPDUhE+NKLmfyWldppJR4UitLB88vB9t1iNSjuWHD8Q4WakFHX9e1l+uuCvSvNcxW/9LiHeFsfaHHN49/RRqScaWbYWriZCvb7Nwo+ARoCiJFpY1A6GwRtsdwA5iswWVwOY0AgNSwLa+5Xcx/iKfXf3BcZGuk68qZzsJEle3NdRVgbs2vr7ZsD2IOjwv+lNMPbx8Vqf4eF8Xp65ooVOpf9C73ibXL5xkriKqUfucbh4cCKv2ia0l6vomSbo8fF1OVGLf/XiS+XTz0jt7uUJ+qTjdxhE8njOpBRZjLNZzpQ9AZmRBONju/uv94jfHdMbV root@lefford'
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC3qF7Pdgtwrh9o/ax3XBZqKn8lZd7VOoXvBgiUKeoR6FwOc958CUjcRHfbutukgpOw4cwvEVefY05/Nfn0VaGgQZVRUSWo4zBK3Pw46cH77sXGCpbWY3sSPeZ9pg4mti6Xatui8nJJzoqlZLkZxZ+k/HxqdbVcgnd1BeywIntGlUmh+iGR8rJL/zq9ann8QK5XcESk9ISsj5lp1o0D9h9K8pBKKL3tEUt3p3TYERcJUnf8+tmC3McQqAIwtnVke+3LnepQhr7JlYBwAO8BFaYW+hjvgTsTLCxMv4TVQQUMXD6VCcfCrNiqxyOLraRRVOU/qe8taC324GakqTz9Bwc2ZVmX4TF4eknIrhkK4nYhDtOwcRYS65e0k2gFJdPDQqZArAdW836hma2vW/2VQ6mnC44NdvLUtcZQSTBDX4pUaU7Rw5nWNPoFbgb/RmyKLjeSsn6xeIcNiU0uCcFymSQnZhNqDdCECrD64bsJzjjYbn/njLyyaL0xsyyQJ4NqoY3uh1eaKfkqKyecBJtBN9ZxN8yJxft9hY4FGfeXLC+KmuAM2orkIpO9w1bkQpAz17MTYu3NG2IMYM18RsDvm1ry985WryG0dS16dE520E/ID8TT0G0usKlWdCDvire0Pw6m/T/xzEdmAf7EndLYZXAPVUxzwWaNl82hBEEt6435rw== nathan@ashwood (Blink)'
 
 admin_ssh_public_key: "{{ admin_ssh_public_keys[0] }}"
 
@@ -15,6 +18,9 @@ project_name: 'lefford'
 
 # Calculated IPv4 address.  Doesn't always work, usually does.
 ipv4_address: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }}"
+
+# The node hosting this mess.
+pve_node: 'lefford'
 
 # Default web options for reverse proxy.
 web:
@@ -49,7 +55,6 @@ my:
 # Some crap that appears to be too cumbersome to do automatically.
 k8s_cluster_names:
   - 'karhold'
-
 
 # A private domain name.
 private_domain_name: "{{ my.domains.private }}"
@@ -115,8 +120,11 @@ default_lxc_template: 'ubuntu-22.04-standard_22.04-1_amd64.tar.zst'
 # Set the description to the description.
 description: "{{ ansible_description }}"
 
+# LXC storage for root disks.
+lxc_storage: 'leo'
+
 # An ample mount, local storage for all LXC containers.
-default_lxc_mount: 'local-lvm:64,mp=/mnt/host,backup=1,size=64G'
+default_lxc_mount: 'leo:64,mp=/mnt/host,backup=1,size=64G'
 
 # Prefix to NFS path exported to k8s clusters.
 k8s_nfs_prefix: '/leo/kubernetes'
@@ -170,3 +178,9 @@ default_pip_packages:
   - 'torrent_parser'
   - 'typing_extensions'
   - 'virtualenv'
+
+# Prefix to FS path mounted to hosts.
+pve_local_share_prefix: '/leo/local'
+
+# Default boot disk size (in GB).
+pve_rootfs_size: '16'

@@ -1,0 +1,24 @@
+---
+- name: 'Run host-specific setup.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Gather facts.'
+      ansible.builtin.setup:
+
+    - name: 'Set OS and distribution facts.'
+      ansible.builtin.include_tasks: 'set_os_facts.yaml'
+
+    - name: 'Install some universally useful packages.'
+      ansible.builtin.include_tasks: 'setup_packages.yaml'
+      when: 'install_common_packages is true and common_packages_installed is not defined'
+      register: 'common_packages_installed'
+
+    - name: 'Create a normal user account.'
+      ansible.builtin.include_tasks: 'setup_normal_user.yaml'
+      when: 'create_normal_user is true and normal_user_name is defined'
+
+    - name: 'Set the hostname explicitly.'
+      ansible.builtin.hostname:
+        name: "{{ clean_hostname }}"
+      when: 'explicitly_set_hostname is true and not host_is_mac and not host_is_synology'

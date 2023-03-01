@@ -60,7 +60,6 @@ all:
     # great.
     pve_lxc:
       vars:
-        ansible_ssh_user: 'nathan'
         pve_role: 'lxc'
       hosts:
         ambrose:
@@ -81,7 +80,6 @@ all:
     # at some point, but I think I'll just make VMs now.
     pve_k8s:
       vars:
-        ansible_ssh_user: 'nathan'
         pve_role: 'k8s'
       children:
         # Control Plane hosts. I am trying to get more comfortable with the
@@ -112,7 +110,6 @@ all:
     # Windows.  Seven should be more than enough.
     pve_kvm:
       vars:
-        ansible_ssh_user: 'nathan'
         pve_role: 'kvm'
       hosts:
         quagg:

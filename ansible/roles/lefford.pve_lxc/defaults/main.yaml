@@ -1,0 +1,90 @@
+---
+# Explicitly set the hostname instead of e.g. "debian", "nug-dougs-macbook-pro," etc.
+explicitly_set_hostname: yes
+
+# Some potential security risk, depending on what you run on the host.
+enable_passwordless_sudo: yes
+
+# Create a non-root user.
+create_normal_user: yes
+
+# This can take a while and should be avoided when possible.
+install_common_packages: yes
+
+# Normal (i.e. non-root) username.
+normal_user_name: null
+
+# Clean, simple hostname.
+clean_hostname: "{{ clean_hostname | splitext | first | lower }}"
+
+# The domain for host email addresses.
+# If the host cron, etc sends me an email, it comes from <hostname>@<email-domain>
+# Should always be overridden.
+pve_host_email_domain: "{{ private_domain_name }}"
+
+# The node hosting the host.
+# This should be defined in the inventory.
+pve_node: null
+
+# The API username.  This will be defined
+pve_api_username: null
+
+# The API password.
+pve_api_password: null
+
+# The OS template that will be used for this container.
+# Defined in the inventory.
+default_lxc_template: null
+
+# The mount items for this host.
+# Defined in the inventory.
+pve_mountpoints: []
+# - node_path: '/mnt/somewhere_on_node/'
+#   host_path: '/mnt/somewhere_on_host/'
+#   perms: '0755'
+#   uid: '1000'
+#   gid: '1000'
+
+# An ample mount, local storage for all LXC containers.
+default_lxc_mount: 'local-lvm:64,mp=/mnt/host,backup=1,size=64G'
+
+# Mountpoint dictionary (JSON), building upon the default mountpoint.
+pve_mountpoints_dict:
+  mp0: "{{ default_lxc_mount }}"
+
+# The VM ID of this host.
+# This should always be 100 or greater, and defined in the inventory.
+pve_vm_id: null
+
+# A root password to set on the host.
+# Set to a random string to avoid shenanigans.
+pve_root_password: "{{ lookup('password', '/dev/null length=12 chars=ascii_letters,digits,punctuation') }}"
+
+# A public key to set authorized on the host.
+# Defined in inventory.
+admin_ssh_public_key: null
+
+admin_ssh_public_keys: []
+
+# Allocations for this host.
+# Sensible defaults; overrides will be defined in inventory.
+pve_cores: 4
+pve_memory_size: 16384
+pve_swap_size: 0
+pve_onboot: yes
+pve_unprivileged: false
+pve_rootfs_size: 16
+pve_features: 'mount=nfs,keyctl=1,nesting=1'
+
+# Where templates are stored.
+pve_template_path: 'local:vztmpl'
+
+# Description.
+description: null
+
+# Apt packages.
+default_apt_packages: []
+
+# Pip packages.
+default_pip_packages: []
+
