@@ -143,7 +143,7 @@ function lefford:usage() {
   printf "${subcommand_column}" 'ansible_task' 'Run a specified Ansible task.';
   printf "${subcommand_column}" 'edit_vault' 'Edit the vault.';
   printf "${subcommand_column}" 'autocomplete' 'Output autocomplete information.';
-  printf "${subcommand_column}" 'pve_node' '';
+  printf "${subcommand_column}" 'pve_node:setup' 'Run setup on the Proxmox VE node.';
   echo '';
   echo 'Proxmox VE LXC container subcommands:';
   printf "${subcommand_column}" 'pve_lxc:create' 'Create the container(s).';

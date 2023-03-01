@@ -1,0 +1,13 @@
+---
+- name: 'Setup Dotfiles.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Set up YADM.'
+      ansible.builtin.include_tasks: 'setup_yadm.yaml'
+
+    - name: 'Set up the Bash prompt.'
+      ansible.builtin.include_tasks: 'setup_bash_prompt.yaml'
+
+    - name: 'Set up the Message-of-the-Day.'
+      ansible.builtin.include_tasks: 'setup_motd.yaml'

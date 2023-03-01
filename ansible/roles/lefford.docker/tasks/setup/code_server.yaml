@@ -1,0 +1,49 @@
+---
+- name: 'Set up Code-Server.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Create the .config directory if it does not already exist.'
+      ansible.builtin.file:
+        path: "{{ normal_user_home }}/.config"
+        state: 'directory'
+        mode: '0755'
+        owner: "{{ normal_user_name }}"
+        group: "{{ normal_user_group }}"
+
+    - name: 'Create the .config/code-server directory.'
+      ansible.builtin.file:
+        path: "{{ normal_user_home }}/.config/code-server"
+        state: 'directory'
+        mode: '0755'
+        owner: "{{ normal_user_name }}"
+        group: "{{ normal_user_group }}"
+
+    - name: "Setup the Code-Server service."
+      community.docker.docker_container:
+        name: 'code-server'
+        image: 'linuxserver/code-server:latest'
+        restart_policy: 'unless-stopped'
+        recreate: yes
+        labels:
+          traefik.enable: 'true'
+          traefik.http.routers.code_server.rule: "HostRegexp(`code.{{ host_private_fqdn }}`, `{subdomain:[a-z0-9-]+}.code.{{ host_private_fqdn }}`)"
+          traefik.http.routers.code_server.tls: 'true'
+          traefik.http.routers.code_server.tls.certresolver: "{{ letsencrypt_private_domain_resolver }}"
+          traefik.http.routers.code_server.tls.domains[0].main: "code.{{ host_private_fqdn }}"
+          traefik.http.routers.code_server.tls.domains[0].sans: "*.code.{{ host_private_fqdn }}"
+          traefik.http.routers.code_server.service: 'code_server'
+          traefik.http.services.code_server.loadbalancer.server.port: '8443'
+          # Note: the following is weird.
+          traefik.http.services.code_server.loadbalancer.server.scheme: 'http'
+        env:
+          PUID: "{{ normal_user_uid }}"
+          PGID: "{{ normal_user_gid }}"
+          TZ: "{{ local_timezone }}"
+          PASSWORD: "{{ easy_password }}"
+          DEFAULT_WORKSPACE: '/workspace'
+          ACTUAL_USERNAME: "{{ normal_user_name }}"
+          ACTUAL_HOSTNAME: "{{ clean_hostname }}"
+        volumes:
+          - "{{ normal_user_home }}/.config/code-server:/config"
+          - "{{ normal_user_home }}:/workspace"

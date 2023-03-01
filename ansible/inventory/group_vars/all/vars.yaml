@@ -44,6 +44,11 @@ my:
 
 # Data structure of the vault.
 # vault:
+#   aws:
+#     credentials:
+#       route53:
+#         access_key_id: <string>
+#         secret_access_key: <string>
 #   easy_password: <string>
 #   proxmox:
 #     nodes:
@@ -51,8 +56,13 @@ my:
 #         api:
 #           username: <string>
 #           password: <string>
+#
 
-# Some crap that appears to be too cumbersome to do automatically.
+# AWS credentials
+route53_access_key_id: "{{ vault.aws.credentials.route53.access_key_id }}"
+route53_secret_access_key: "{{ vault.aws.credentials.route53.secret_access_key }}"
+
+# Explicitly list cluster names.
 k8s_cluster_names:
   - 'karhold'
 
@@ -184,3 +194,17 @@ pve_local_share_prefix: '/leo/local'
 
 # Default boot disk size (in GB).
 pve_rootfs_size: '16'
+
+# Base URL for MOTD files.
+motd_assets_base_url: 'https://raw.githubusercontent.com/hellholt/assets/main/images/houses/ansi/64/'
+
+# Log in to Docker Hub?
+docker_hub_login: no
+docker_hub_username: null
+docker_hub_password: null
+
+# Portainer directory.
+portainer_data_dir: '/mnt/host/portainer'
+
+# Code-Server directory.
+codeserver_data_dir: '/mnt/host/code_server'

@@ -1,0 +1,18 @@
+---
+- name: 'Setup Local Modifications to Bash Prompt.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Copy Bash prompt template script (root).'
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/bash_prompt_local.sh.j2"
+        dest: '~/.bash_prompt_local'
+      changed_when: no
+
+    - name: 'Copy Bash prompt template script (normal user).'
+      ansible.builtin.template:
+        src: "{{ role_path }}/templates/bash_prompt_local.sh.j2"
+        dest: '~/.bash_prompt_local'
+      changed_when: no
+      become: yes
+      become_user: "{{ normal_user_name }}"

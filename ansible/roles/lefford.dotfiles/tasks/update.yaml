@@ -1,0 +1,20 @@
+---
+- name: 'Update Dotfiles.'
+  remote_user: 'root'
+  block:
+
+    - name: 'YADM update (root).'
+      ansible.builtin.shell:
+        cmd: |
+          yadm reset --hard
+          yadm pull
+      ignore_errors: yes
+
+    - name: 'YADM update (normal user).'
+      ansible.builtin.shell:
+        cmd: |
+          yadm reset --hard
+          yadm pull
+      become: yes
+      become_user: "{{ normal_user_name }}"
+      ignore_errors: yes

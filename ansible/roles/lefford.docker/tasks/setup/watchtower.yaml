@@ -1,0 +1,31 @@
+---
+- name: 'Set up Watchtower.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Set up Watchtower.'
+      community.docker.docker_container:
+        name: 'watchtower'
+        image: 'containrrr/watchtower'
+        state: 'started'
+        restart: yes
+        volumes:
+          - '/var/run/docker.sock:/var/run/docker.sock'
+        env:
+          TZ: 'America/New_York'
+          WATCHTOWER_CLEANUP: 'true'
+          WATCHTOWER_REMOVE_VOLUMES: 'true'
+          WATCHTOWER_DEBUG: 'true'
+        restart_policy: 'unless-stopped'
+        labels:
+          traefik.enable: 'true'
+          traefik.http.routers.watchtower.rule: "HostRegexp(`watchtower.{{ host_private_fqdn }}`, `{subdomain:[a-z0-9-]+}.watchtower.{{ host_private_fqdn }}`)"
+          traefik.http.routers.watchtower.tls: 'true'
+          traefik.http.routers.watchtower.tls.certresolver: "{{ letsencrypt_private_domain_resolver }}"
+          traefik.http.routers.watchtower.tls.domains[0].main: "watchtower.{{ host_private_fqdn }}"
+          traefik.http.routers.watchtower.tls.domains[0].sans: "*.watchtower.{{ host_private_fqdn }}"
+          traefik.http.routers.watchtower.service: 'watchtower'
+          traefik.http.services.watchtower.loadbalancer.server.port: '8080'
+          traefik.http.services.watchtower.loadbalancer.server.scheme: 'http'
+        container_default_behavior: 'no_defaults'
+

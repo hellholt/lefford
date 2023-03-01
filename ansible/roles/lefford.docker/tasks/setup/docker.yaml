@@ -1,0 +1,27 @@
+---
+- name: 'Set up Docker.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Install Docker.'
+      ansible.builtin.include_role:
+        name: 'geerlingguy.docker'
+      vars:
+        docker_edition: 'ce'
+        docker_package: "docker-{{ docker_edition }}"
+        docker_package_state: 'present'
+        docker_service_state: 'started'
+        docker_service_enabled: yes
+        docker_restart_handler_state: 'restarted'
+        docker_install_compose: yes
+        docker_users:
+          - "{{ normal_user_name }}"
+        docker_daemon_options:
+          exec-opts:
+            - 'native.cgroupdriver=systemd'
+
+    - name: 'Log in to Docker Hub.'
+      community.docker.docker_login:
+        username: "{{ docker_hub_username }}"
+        password: "{{ docker_hub_password }}"
+      when: 'docker_hub_login is true'

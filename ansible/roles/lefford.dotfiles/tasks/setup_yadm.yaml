@@ -1,0 +1,48 @@
+---
+- name: 'Setup Dotfiles.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Install YADM.'
+      ansible.builtin.copy:
+        dest: '/usr/local/bin/yadm'
+        src: "{{ role_path }}/files/yadm.sh"
+        owner: 'root'
+        group: 'root'
+        mode: 0755
+
+    - name: 'YADM bootstrap (root).'
+      ansible.builtin.shell:
+        cmd: |
+          yadm clone --bootstrap {{ dotfiles_repo_url }}
+          yadm reset --hard
+        creates: "/root/{{ yadm_config_path }}"
+      ignore_errors: yes
+
+    - name: 'YADM bootstrap (normal user).'
+      ansible.builtin.shell:
+        cmd: |
+          yadm clone --bootstrap {{ dotfiles_repo_url }}
+          yadm reset --hard
+        creates: "{{ normal_user_home }}/{{ yadm_config_path }}"
+      become: yes
+      become_user: "{{ normal_user_name }}"
+      ignore_errors: yes
+
+    - name: 'Update dotfiles (root user).'
+      ansible.builtin.cron:
+        name: 'update-dotfiles'
+        special_time: 'daily'
+        job: |
+          /bin/bash -lc 'yadm pull' > /dev/null
+      ignore_errors: yes
+
+    - name: 'Update dotfiles (normal user).'
+      ansible.builtin.cron:
+        name: 'update-dotfiles'
+        special_time: 'daily'
+        job: |
+          /bin/bash -lc 'yadm pull' > /dev/null
+      ignore_errors: yes
+      become: yes
+      become_user: "{{ normal_user_name }}"

@@ -1,0 +1,30 @@
+---
+- name: 'Set up Portainer.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Create the Portainer data directory.'
+      ansible.builtin.file:
+        path: "{{ portainer_data_dir }}/data"
+        state: 'directory'
+        mode: '0600'
+
+    - name: "Setup the Portainer service."
+      community.docker.docker_container:
+        name: 'portainer'
+        image: 'portainer/portainer-ce'
+        restart_policy: 'unless-stopped'
+        recreate: no
+        labels:
+          traefik.enable: 'true'
+          traefik.http.routers.portainer.rule: "HostRegexp(`portainer.{{ host_private_fqdn }}`, `{subdomain:[a-z0-9-]+}.portainer.{{ host_private_fqdn }}`)"
+          traefik.http.routers.portainer.tls: 'true'
+          traefik.http.routers.portainer.tls.certresolver: "{{ letsencrypt_private_domain_resolver }}"
+          traefik.http.routers.portainer.tls.domains[0].main: "portainer.{{ host_private_fqdn }}"
+          traefik.http.routers.portainer.tls.domains[0].sans: "*.portainer.{{ host_private_fqdn }}"
+          traefik.http.routers.portainer.service: 'portainer'
+          traefik.http.services.portainer.loadbalancer.server.port: '9443'
+          traefik.http.services.portainer.loadbalancer.server.scheme: 'https'
+        volumes:
+          - "{{ portainer_data_dir }}/data:/data"
+          - '/var/run/docker.sock:/var/run/docker.sock'

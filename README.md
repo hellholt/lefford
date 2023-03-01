@@ -26,6 +26,7 @@ Infrastructure was initially managed through [Terraform](https://terraform.io/);
           - [📄**vault**](./ansible/inventory/group_vars/all/vault): Shared secrets, pls don't pwn me.
       - [📁**host_vars/**](./ansible/inventory/host_vars/): Variables defined per-host.
     - [📁**roles/**](./ansible/roles/): Custom roles developed for administration.
-      - [📁**lefford.pve_lxc/**](./ansible/roles/lefford.pve_lxc/): A role for managing the LXC container lifecycle.
+      - [📁**lefford.dotfiles/**](./ansible/roles/lefford.dotfiles/): Injecting dotfiles into hosts.
+      - [📁**lefford.pve_lxc/**](./ansible/roles/lefford.pve_lxc/): Managing the LXC container lifecycle.
       - [📁**lefford.pve_node/**](./ansible/roles/lefford.pve_node/): A desired state definition for Lefford itself.
   - [📁**bash/**](./bash/): A Bash script to wrap Ansible in a friendly command.

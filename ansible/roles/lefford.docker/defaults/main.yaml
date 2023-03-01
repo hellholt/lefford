@@ -1,0 +1,43 @@
+---
+# Clean, simple hostname.
+clean_hostname: "{{ clean_hostname | splitext | first | lower }}"
+
+# Log in to Docker Hub?
+docker_hub_login: no
+docker_hub_username: null
+docker_hub_password: null
+
+# Traefik directory.
+traefik_data_dir: '/mnt/host/traefik'
+
+# Portainer directory.
+portainer_data_dir: '/mnt/host/portainer'
+
+# Code-Server directory.
+codeserver_data_dir: '/mnt/host/code_server'
+
+# LetsEncrypt certificate resolver name.
+letsencrypt_private_domain_resolver: null
+
+# LetsEncrypt email address.
+letsencrypt_email_address: null
+
+# AWS credentials
+route53_access_key_id: null
+route53_secret_access_key: null
+
+# A private domain name.
+private_domain_name: null
+# A personal domain name.
+personal_domain_name: null
+
+# A "private" FQDN.
+host_private_fqdn: "{{ clean_hostname }}.{{ private_domain_name }}"
+# A "personal" FQDN.
+host_personal_fqdn: "{{ clean_hostname }}.{{ personal_domain_name }}"
+
+# Normal (i.e. non-root) username.
+normal_user_name: null
+
+# Normal user home directory.
+normal_user_home: "/home/{{ normal_user_name }}"

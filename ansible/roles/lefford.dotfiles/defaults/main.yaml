@@ -1,0 +1,12 @@
+---
+# Clean, simple hostname.
+clean_hostname: "{{ clean_hostname | splitext | first | lower }}"
+
+# Normal (i.e. non-root) username.
+normal_user_name: null
+
+# Dotfiles repository.
+dotfiles_repo_url: null
+
+# YADM config file path.
+yadm_config_path: '.config/yadm/config'

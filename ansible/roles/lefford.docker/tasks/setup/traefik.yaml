@@ -1,0 +1,56 @@
+---
+- name: 'Set up Traefik.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Create the Traefik configuration directory.'
+      ansible.builtin.file:
+        path: "{{ traefik_data_dir }}/conf.d/"
+        state: 'directory'
+        mode: '0600'
+        owner: 'root'
+        group: 'root'
+
+    - name: 'Create the Traefik network.'
+      community.docker.docker_network:
+        name: 'traefik'
+
+    - name: 'Create the Traefik container.'
+      community.general.docker_container:
+        name: 'traefik'
+        image: 'traefik:latest'
+        restart_policy: 'unless-stopped'
+        recreate: yes
+        network_mode: 'host'
+        volumes:
+          - "{{ traefik_data_dir }}:/etc/traefik"
+          - '/var/run/docker.sock:/var/run/docker.sock'
+        command: |
+          --log.level=WARN
+          --api.dashboard=false
+          --serversTransport.insecureskipverify=true
+          --providers.docker=true
+          --providers.docker.watch=true
+          --providers.docker.exposedByDefault=false
+          --providers.file=true
+          --providers.file.directory='/etc/traefik/conf.d'
+          --providers.file.watch=true
+          --entryPoints.web
+          --entryPoints.web.address=':80'
+          --entryPoints.web.http
+          --entryPoints.web.http.redirections
+          --entryPoints.web.http.redirections.entryPoint
+          --entryPoints.web.http.redirections.entryPoint.to='websecure'
+          --entryPoints.web.http.redirections.entryPoint.scheme='https'
+          --entryPoints.web.forwardedHeaders.insecure
+          --entryPoints.websecure
+          --entryPoints.websecure.address=':443'
+          --entryPoints.websecure.http.tls.certResolver={{ letsencrypt_private_domain_resolver }}
+          --certificatesResolvers.{{ letsencrypt_private_domain_resolver }}.acme.email="{{ letsencrypt_email_address }}"
+          --certificatesResolvers.{{ letsencrypt_private_domain_resolver }}.acme.storage='/etc/traefik/letsencrypt.json'
+          --certificatesResolvers.{{ letsencrypt_private_domain_resolver }}.acme.dnsChallenge
+          --certificatesResolvers.{{ letsencrypt_private_domain_resolver }}.acme.dnsChallenge.provider='route53'
+        env:
+          AWS_ACCESS_KEY_ID: "{{ route53_access_key_id }}"
+          AWS_SECRET_ACCESS_KEY: "{{ route53_secret_access_key }}"
+        container_default_behavior: 'no_defaults'

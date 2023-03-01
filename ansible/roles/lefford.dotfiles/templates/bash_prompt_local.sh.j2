@@ -1,0 +1,14 @@
+# ~/.bash_prompt_local: sourced from .bash_prompt to construct our prompt.
+
+clean_hostname="{{ clean_hostname }}";
+primary_color="$(tput setaf {{ hostvars[clean_hostname].prompt.colors.primary }})";
+secondary_color="$(tput setaf {{ hostvars[clean_hostname].prompt.colors.secondary }})";
+tertiary_color="$(tput setaf {{ hostvars[clean_hostname].prompt.colors.tertiary }})";
+emoji_segment="{{ hostvars[clean_hostname].prompt.emoji }}";
+username_segment="$(printf "\[$(tput sgr0)$(tput bold)\]${primary_color}\u\[$(tput sgr0)\]" 2> /dev/null)";
+atsign_segment="$(printf "\[$(tput sgr0)$(tput bold)\]@\[$(tput sgr0)\]")";
+hostname_segment="$(printf "\[$(tput sgr0)$(tput bold)\]${secondary_color}\h\[$(tput sgr0)\]")";
+colon_segment="$(printf "\[$(tput sgr0)$(tput bold)\]:\[$(tput sgr0)\]")";
+path_segment="$(printf "\[$(tput sgr0)$(tput bold)\]${tertiary_color}\w\[$(tput sgr0)\]")";
+suffix_segment="$(printf "\[$(tput sgr0)$(tput bold)\]\[$(tput sgr0)\]\n\$ ")";
+echo "$(printf "${emoji_segment}${username_segment}${atsign_segment}${hostname_segment}${colon_segment}${path_segment}${suffix_segment}")";

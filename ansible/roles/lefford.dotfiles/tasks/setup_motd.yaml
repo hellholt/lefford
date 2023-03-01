@@ -1,0 +1,15 @@
+---
+- name: 'Setup Dotfiles.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Set the MOTD.'
+      ansible.builtin.get_url:
+        url: "{{ motd_assets_base_url }}/{{ clean_hostname }}.txt"
+        dest: '/etc/motd'
+        force: no
+        owner: 'root'
+        mode: 0644
+      ignore_errors: yes
+      become: yes
+
