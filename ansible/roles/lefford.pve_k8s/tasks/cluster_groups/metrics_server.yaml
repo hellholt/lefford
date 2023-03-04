@@ -1,0 +1,16 @@
+---
+- name: 'Add Metrics Server chart repository.'
+  kubernetes.core.helm_repository:
+    name: 'metrics-server'
+    repo_url: 'https://kubernetes-sigs.github.io/metrics-server/'
+
+- name: 'Deploy Metrics Server.'
+  kubernetes.core.helm:
+    name: 'metrics-server'
+    chart_ref: 'metrics-server/metrics-server'
+    release_namespace: 'metrics-server'
+    create_namespace: yes
+    values:
+      args:
+        - '--metric-resolution=10s'
+        - '--kubelet-insecure-tls'

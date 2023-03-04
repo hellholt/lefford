@@ -54,80 +54,81 @@ END
   popd > /dev/null;
 }
 
-# Perform an operation on the Proxmox VE node.
-function lefford:pve_node() {
-  : "${2?"Usage: ${FUNCNAME[0]} <COMMAND> <HOSTNAME|GROUP>"}";
-  local host_expression="${1}";
-  local subcommand="${2}";
-  local args="${@:3}";
-  # If we need to perform an operation on the node, we can assume that it is
-  # already provisioned.
-  ANSIBLE_GATHERING='implicit' lefford:ansible_task \
-    'lefford' \
-    'lefford.pve_node' \
-    "${subcommand}.yaml" \
-    "${args}";
-}
-
 # Perform an operation on an LXC container.
 function lefford:pve_lxc() {
-  : "${2?"Usage: ${FUNCNAME[0]} <COMMAND> <HOSTNAME|GROUP>"}";
-  local host_expression="${1}";
-  local subcommand="${2}";
+  : "${2?"Usage: ${FUNCNAME[0]}:${1:='<SUBCOMMAND>'} <HOSTNAME|GROUP>"}";
+  local subcommand="${1}";
+  local host_expression="${2}";
   local args="${@:3}";
   # We need to use explicit gathering for LXC containers because they are not
   # always provisioned yet.
-  ANSIBLE_GATHERING='explicit' lefford:ansible_task \
+  ANSIBLE_GATHERING='explicit' \
+    lefford:ansible_task \
     "${host_expression}" \
     'lefford.pve_lxc' \
     "${subcommand}.yaml" \
     "${args}";
 }
 
-# Perform setup operations on a Proxmox VE LXC container.
-function lefford:setup_host() {
-  : "${1?"Usage: ${FUNCNAME[0]} <HOSTNAME|GROUP>"}";
-  local host_expression="${1}";
-  local operation="${2}";
-  local args="${@:3}";
-  pushd "${ansible_path}" > /dev/null;
-  # Use root user for setup operations.
-  lefford:ansible_role \
-    "${host_expression}" \
-    'lefford.pve_lxc' \
-    "${operation}.yaml" \
-    -e 'ansible_user=root' \
-    "${args}";
-  popd > /dev/null;
-}
-
-# Apply a setup group to a host.
-function lefford:apply_setup_group() {
-  : "${2?"Usage: ${FUNCNAME[0]} <HOSTNAME|GROUP> <SETUP_GROUP>"}";
-  local host_expression="${1}";
-  local setup_group="${2}";
-  local args="${@:3}";
-  # We can use implicit gathering for setup groups because they are always
-  # provisioned at this point. We should use the root user for setup.
-  ANSIBLE_GATHERING='implicit' lefford:ansible_task \
-    "${host_expression}" \
-    'lefford.setup_host' \
-    "setup_groups/${setup_group}.yaml" \
-    "${args}" \
-    --become;
-}
-
 # Perform an operation on the Kubernetes cluster.
-function lefford:k8s_cluster() {
-  : "${2?"Usage: ${FUNCNAME[0]} <COMMAND> <HOSTNAME|GROUP>"}";
+function lefford:pve_k8s() {
+  : "${1?"Usage: ${FUNCNAME[0]}:${1:='<SUBCOMMAND>'} [HOSTNAME|GROUP]"}";
   local subcommand="${1}";
-  local args="${@:2}";
+  local host_expression="${2:-pve_k8s}";
+  local args="${@:3}";
   # We don't know if the cluster is provisioned yet, so we need to use explicit
   # gathering.
   ANSIBLE_GATHERING='explicit' \
     lefford:ansible_task \
-    'pve_k8s' \
-    'lefford.kubernetes' \
+    "${host_expression}" \
+    'lefford.pve_k8s' \
+    "${subcommand}.yaml" \
+    "${args}";
+}
+
+# Perform a Docker operation.
+function lefford:docker() {
+  : "${2?"Usage: ${FUNCNAME[0]}:${1:='<SUBCOMMAND>'} [HOSTNAME|GROUP]"}";
+  local subcommand="${1}";
+  local host_expression="${2:-pve_k8s}";
+  local args="${@:3}";
+  # We don't know if the cluster is provisioned yet, so we need to use explicit
+  # gathering.
+  ANSIBLE_GATHERING='explicit' \
+    lefford:ansible_task \
+    "${host_expression}" \
+    'lefford.docker' \
+    "${subcommand}.yaml" \
+    "${args}";
+}
+
+# Perform a dotfiles operation.
+function lefford:dotfiles() {
+  : "${2?"Usage: ${FUNCNAME[0]}:${1:='<SUBCOMMAND>'} [HOSTNAME|GROUP]"}";
+  local subcommand="${1}";
+  local host_expression="${2:-pve_k8s}";
+  local args="${@:3}";
+  # We don't know if the cluster is provisioned yet, so we need to use explicit
+  # gathering.
+  ANSIBLE_GATHERING='explicit' \
+    lefford:ansible_task \
+    "${host_expression}" \
+    'lefford.dotfiles' \
+    "${subcommand}.yaml" \
+    "${args}";
+}
+
+# Perform an operation on the Proxmox VE node.
+function lefford:pve_node() {
+  : "${1?"Usage: ${FUNCNAME[0]}:${1:='<SUBCOMMAND>'}"}";
+  local subcommand="${1}";
+  local args="${@:2}";
+  # If we need to perform an operation on the node, we can assume that it is
+  # already provisioned.
+  ANSIBLE_GATHERING='implicit' \
+    lefford:ansible_task \
+    'lefford' \
+    'lefford.pve_node' \
     "${subcommand}.yaml" \
     "${args}";
 }
@@ -155,12 +156,12 @@ function lefford:usage() {
   printf "${subcommand_column}" 'pve_lxc:setup' 'Setup the container(s).';
   echo '';
   echo 'Kubernetes cluster subcommands:';
-  printf "${subcommand_column}" 'create_cluster' 'Create cluster (but do not deploy tasks).';
-  printf "${subcommand_column}" 'recreate_cluster' 'Destroy and rereate the cluster (but do not deploy tasks).';
-  printf "${subcommand_column}" 'destroy_cluster' 'Destroy the cluster.';
-  printf "${subcommand_column}" 'reset_cluster' 'Reset the cluster and deploy tasks.';
-  printf "${subcommand_column}" 'setup_cluster' 'Setup the cluster and deploy tasks.';
-  printf "${subcommand_column}" 'redeploy_cluster' 'Deploy/redeploy tasks on the clustter.';
+  printf "${subcommand_column}" 'pve_k8s:create' 'Create cluster (but do not deploy tasks).';
+  printf "${subcommand_column}" 'pve_k8s:recreate' 'Destroy and rereate the cluster (but do not deploy tasks).';
+  printf "${subcommand_column}" 'pve_k8s:destroy' 'Destroy the cluster.';
+  printf "${subcommand_column}" 'pve_k8s:reset' 'Reset the cluster and deploy tasks.';
+  printf "${subcommand_column}" 'pve_k8s:setup' 'Setup the cluster and deploy tasks.';
+  printf "${subcommand_column}" 'pve_k8s:stop' 'Stop tasks on the clustter.';
   echo '';
 }
 
@@ -168,37 +169,24 @@ function lefford:usage() {
 function lefford:list_roles() {
   for i in "${ansible_path}/roles/"lefford.*; do
     echo "${i#*\.}";
+    for j in "${i}/tasks/"*.yaml; do
+      echo "${i#*\.}:$(basename "${j##*/}" '.yaml')";
+    done;
   done;
 }
-
-general_subcommands=(
-  'usage'
-  'ansible_task'
-  'edit_vault'
-  'autocomplete'
-)
-
-# Roles.
-IFS=$'\n' read -d '' -r -a discovered_subcommands < <(lefford:list_roles)
-
-# Valid subcommands of lefford:k8s_cluster.
-k8s_cluster_subcommands=(
-  'create_cluster'
-  'recreate_cluster'
-  'destroy_cluster'
-  'reset_cluster'
-  'setup_cluster'
-  'redeploy_cluster'
-)
 
 # Print autocomplete script.
 function lefford:autocomplete() {
   local old_ifs="${IFS}";
   IFS=\ ;
+  IFS=$'\n' read -d '' -r -a discovered_subcommands < <(lefford:list_roles);
   local all_subcommands=(
-    "$(echo "${general_subcommands[*]}")"
+    'usage'
+    'ansible_task'
+    'edit_vault'
+    'list_roles'
+    'autocomplete'
     "$(echo "${discovered_subcommands[*]}")"
-    "$(echo "${k8s_cluster_subcommands[*]}")"
   )
   local subcommands_string="$(echo "${all_subcommands[*]}")";
   echo complete -W "'"${subcommands_string}"'" lefford;
@@ -207,19 +195,13 @@ function lefford:autocomplete() {
 
 # Primary function.
 function lefford() {
-  : "${1?"Usage: ${FUNCNAME[0]} <SUBCOMMAND> [ARGUMENTS] ..."}";
+  : "${1?"Usage: ${FUNCNAME[0]} <SUBCOMMAND> [HOSTNAME|GROUP] [...ARGUMENTS]"}";
   local subcommand="${1}";
   export OBJC_DISABLE_INITIALIZE_FORK_SAFETY='YES';
   export K8S_AUTH_KUBECONFIG='~/.kube/config';
   shift;
-  if type "lefford:${subcommand%:*}" > /dev/null 2>&1; then
-    "lefford:${subcommand%:*}" "${1}" "${subcommand#*:}" "${@:2}";
-  elif [[ " ${discovered_subcommands[*]} " =~ " ${subcommand%:*} " ]]; then
-    lefford:ansible_task "${1}" "lefford.${subcommand%:*}" "${subcommand#*:}.yaml" "${@:2}";
-  elif [[ " ${general_subcommands[*]} " =~ " ${subcommand%:*} " ]]; then
-    lefford:ansible_task "${1}" "lefford.${subcommand%:*}" "${subcommand#*:}.yaml" "${@:2}";
-  elif [[ " ${k8s_cluster_subcommands[*]} " =~ " ${subcommand} " ]]; then
-    lefford:k8s_cluster "${subcommand}" "${@}";
+  if type lefford:"${subcommand%:*}" > /dev/null 2>&1; then
+    lefford:"${subcommand%:*}" "${subcommand#*:}" "${@}";
   else
     lefford:usage;
   fi;

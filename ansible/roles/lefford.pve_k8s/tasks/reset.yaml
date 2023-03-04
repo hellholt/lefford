@@ -1,0 +1,7 @@
+---
+- name: 'Recreate cluster.'
+  ansible.builtin.include_tasks: 'recreate.yaml'
+
+- name: 'Setup cluster.'
+  ansible.builtin.include_tasks: 'setup.yaml'
+

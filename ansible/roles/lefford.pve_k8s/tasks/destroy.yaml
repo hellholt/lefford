@@ -1,0 +1,11 @@
+---
+- name: 'Stop hosts.'
+  ansible.builtin.include_role:
+    name: 'lefford.pve_lxc'
+    tasks_from: 'stop.yaml'
+  ignore_errors: yes
+
+- name: 'Destroy hosts.'
+  ansible.builtin.include_role:
+    name: 'lefford.pve_lxc'
+    tasks_from: 'destroy.yaml'

@@ -193,7 +193,7 @@ default_pip_packages:
 pve_local_share_prefix: '/leo/local'
 
 # Default boot disk size (in GB).
-pve_rootfs_size: '16'
+pve_rootfs_size: '64'
 
 # Base URL for MOTD files.
 motd_assets_base_url: 'https://raw.githubusercontent.com/hellholt/assets/main/images/houses/ansi/64/'

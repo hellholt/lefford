@@ -1,0 +1,94 @@
+---
+- name: 'Set K8s cluster FQDN facts.'
+  ansible.builtin.set_fact:
+    host_private_fqdn: "{{ k8s_cluster }}.{{ private_domain_name }}"
+
+- name: 'Install K8s custom service.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Create K8s custom service.'
+      ansible.builtin.copy:
+        dest: '/etc/systemd/system/k8s-custom.service'
+        content: |
+          [Unit]
+          Description=Kubernetes Custom Actions
+          [Service]
+          ExecStart=mount --make-rshared /
+          [Install]
+          WantedBy=multi-user.target
+        mode: 0644
+        owner: 'root'
+        group: 'root'
+
+    - name: 'Start K8s custom service.'
+      ansible.builtin.systemd:
+        name: 'k8s-custom'
+        daemon_reload: yes
+        state: 'started'
+        enabled: yes
+
+- name: 'Create the host local storage directory.'
+  ansible.builtin.file:
+    path: "{{ k8s_storage_dir }}"
+    state: 'directory'
+    mode: '0777'
+
+- name: 'Install Kubernetes.'
+  ansible.builtin.include_role:
+    name: 'geerlingguy.kubernetes'
+  vars:
+    kubernetes_packages:
+      - name: 'kubelet'
+        state: 'present'
+      - name: 'kubectl'
+        state: 'present'
+      - name: 'kubeadm'
+        state: 'present'
+      - name: 'kubernetes-cni'
+        state: 'present'
+    kubernetes_pod_network:
+      cni: 'weave'
+      cidr: '192.168.0.0/16'
+    kubernetes_version: "{{ k8s_version }}"
+    kubernetes_role: "{{ pve_k8s_role }}"
+    kubernetes_ignore_preflight_errors: 'all'
+    kubernetes_join_command_extra_opts: "--ignore-preflight-errors={{ kubernetes_ignore_preflight_errors }}"
+    # kubernetes_config_init_configuration:
+    kubernetes_config_cluster_configuration:
+      clusterName: "{{ k8s_cluster }}"
+      networking:
+        podSubnet: "{{ kubernetes_pod_network.cidr }}"
+      kubernetesVersion: "{{ kubernetes_version_kubeadm }}"
+    kubernetes_config_kubelet_configuration:
+      cgroupDriver: 'systemd'
+
+- name: 'Create the Traefik configuration directory.'
+  ansible.builtin.file:
+    path: "{{ traefik_data_dir }}/conf.d"
+    state: 'directory'
+    mode: '0600'
+
+- name: 'Create the configuration for this proxy.'
+  ansible.builtin.copy:
+    dest: "{{ traefik_data_dir }}/conf.d/{{ k8s_cluster }}.yaml"
+    content: |
+      http:
+        routers:
+          {{ k8s_cluster }}:
+            rule: "HostRegexp(`{{ host_private_fqdn }}`, `{subdomain}.{{ host_private_fqdn }}`)"
+            entryPoints:
+              - 'websecure'
+            service: '{{ k8s_cluster }}'
+            priority: 10
+            tls:
+              certResolver: '{{ letsencrypt_private_domain_resolver }}'
+              domains:
+                - main: '{{ host_private_fqdn }}'
+                  sans:
+                    - '*.{{ host_private_fqdn }}'
+        services:
+          {{ k8s_cluster }}:
+            loadBalancer:
+              servers:
+                - url: 'http://{{ host_private_fqdn }}:32080/'

@@ -1,0 +1,6 @@
+---
+- name: 'Destroy cluster.'
+  ansible.builtin.include_tasks: 'destroy.yaml'
+
+- name: 'Create cluster.'
+  ansible.builtin.include_tasks: 'create.yaml'

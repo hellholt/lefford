@@ -1,0 +1,87 @@
+---
+- name: 'Set some facts.'
+  ansible.builtin.set_fact:
+    k8s_service_private_fqdn: "whoami.{{ host_private_fqdn }}"
+    k8s_service_personal_fqdn: "whoami.{{ host_personal_fqdn }}"
+
+- name: 'Create the whoami namespace.'
+  kubernetes.core.k8s:
+    kubeconfig: '~/.kube/config'
+    name: 'whoami'
+    api_version: 'v1'
+    kind: 'Namespace'
+    state: 'present'
+
+- name: 'Whoami deployment.'
+  kubernetes.core.k8s:
+    namespace: 'whoami'
+    kubeconfig: '~/.kube/config'
+    definition:
+      apiVersion: 'apps/v1'
+      kind: 'Deployment'
+      metadata:
+        name: 'whoami'
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: 'whoami'
+        template:
+          metadata:
+            labels:
+              app: 'whoami'
+          spec:
+            containers:
+            - name: 'whoami'
+              image: 'traefik/whoami'
+
+- name: 'Whoami service.'
+  kubernetes.core.k8s:
+    namespace: 'whoami'
+    kubeconfig: '~/.kube/config'
+    definition:
+      apiVersion: 'v1'
+      kind: 'Service'
+      metadata:
+        name: 'whoami'
+      spec:
+        ports:
+        - name: 'http'
+          targetPort: 80
+          port: 80
+        selector:
+          app: 'whoami'
+
+- name: 'Whoami ingress.'
+  kubernetes.core.k8s:
+    namespace: 'whoami'
+    kubeconfig: '~/.kube/config'
+    definition:
+      apiVersion: 'networking.k8s.io/v1'
+      kind: 'Ingress'
+      metadata:
+        name: 'whoami'
+        namespace: 'whoami'
+        annotations: {}
+      spec:
+        rules:
+        - host: "{{ k8s_service_private_fqdn }}"
+          http:
+            paths:
+            - pathType: 'Prefix'
+              path: "/"
+              backend:
+                service:
+                  name: 'whoami'
+                  port:
+                    number: 80
+        - host: "{{ k8s_service_personal_fqdn }}"
+          http:
+            paths:
+            - pathType: 'Prefix'
+              path: "/"
+              backend:
+                service:
+                  name: 'whoami'
+                  port:
+                    number: 80

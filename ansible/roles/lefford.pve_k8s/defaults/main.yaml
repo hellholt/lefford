@@ -1,0 +1,62 @@
+---
+# The hostname of this host.
+clean_hostname: "{{ clean_hostname | splitext | first | lower }}"
+
+# The cluster name, e.g. "my-happy-cluster".  Set in inventory.
+k8s_cluster: null
+
+# The IP address of this host.
+ipv4_address: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }}"
+
+# A Route 53 "private" zone ID.
+route53_private_zone_id: null
+# A Route 53 "personal" zone ID.
+route53_personal_zone_id: null
+
+# A private domain name.
+private_domain_name: 'example.net'
+
+# A "private" FQDN.
+host_private_fqdn: "{{ k8s_cluster }}.{{ private_domain_name }}"
+
+# Cluster groups are special groups that have a defined setup task.
+k8s_cluster_groups:
+  - 'get_config'                  # Get Kubectl config.
+  - 'route53'                     # Add DNS records.
+  - 'helm'                        # Install Helm for package control.
+  - 'metrics_server'              # Local metrics gathering and reporting.
+  - 'local_storage_provisioner'   # Allow provisioning persistent local storage.
+  - 'traefik'                     # Install and setup Traefik as Ingress Controller.
+  - 'argocd'                      # Install ArgoCD as GitOps controller.
+  - 'whoami'                      # Install Whoami as test service.
+  - 'prometheus'                  # Install Kube-Prometheus-Stack for monitoring and reporting.
+
+# Some cluster groups contain all hosts.
+k8s_universal_cluster_groups:
+  - 'get_config'
+  - 'route53'
+  - 'helm'
+  - 'metrics_server'
+  - 'nfs_provisioner'
+  - 'local_storage_provisioner'
+  - 'traefik'
+  - 'argocd'
+  - 'whoami'
+  - 'prometheus'
+
+# An easy password for accessing some services.
+easy_password: null
+
+# Kubernetes version.
+k8s_version: '1.20'
+
+# LetsEncrypt private domain resolver name.
+letsencrypt_private_domain_resolver: null
+# LetsEncrypt email address.
+letsencrypt_email_address: null
+
+# Traefik directory.
+traefik_data_dir: '/mnt/host/traefik'
+
+# Storage directory.
+k8s_storage_dir: '/mnt/host/k8s'

@@ -1,0 +1,5 @@
+---
+- name: 'Create hosts.'
+  ansible.builtin.include_role:
+    name: 'lefford.pve_lxc'
+    tasks_from: 'create.yaml'

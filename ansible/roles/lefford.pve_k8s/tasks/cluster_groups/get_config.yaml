@@ -1,0 +1,44 @@
+---
+- name: 'Use the root user for the time being.'
+  remote_user: 'root'
+  block:
+
+  - name: 'Copy the Kubeconfig locally.'
+    when: 'k8s_role == "master"'
+    block:
+
+    - name: 'Copy configuration.'
+      ansible.builtin.slurp:
+        src: '/etc/kubernetes/admin.conf'
+      register: 'k8s_kube_config_slurp'
+
+    - name: 'Set fact for the configuration.'
+      ansible.builtin.set_fact:
+        k8s_kube_config: "{{ k8s_kube_config_slurp['content'] | b64decode | from_yaml }}"
+
+    - name: "Create config destination directory."
+      delegate_to: 'localhost'
+      ansible.builtin.file:
+        path: '~/.kube'
+        mode: '0700'
+        state: 'directory'
+
+    - name: 'Write the kubeconfig locally.'
+      delegate_to: 'localhost'
+      ansible.builtin.copy:
+        content: "{{ k8s_kube_config | to_nice_yaml }}"
+        dest: "~/.kube/{{ k8s_cluster }}.cluster.config"
+
+    - name: 'Replace crap values in kubeconfig.'
+      delegate_to: 'localhost'
+      ansible.builtin.replace:
+        path: "~/.kube/{{ k8s_cluster }}.cluster.config"
+        regexp: 'kubernetes(-admin)?'
+        replace: "{{ k8s_cluster }}"
+
+    - name: 'Replace crap values in kubeconfig (pt. 2).'
+      delegate_to: 'localhost'
+      ansible.builtin.replace:
+        path: "~/.kube/{{ k8s_cluster }}.cluster.config"
+        regexp: '{{ k8s_cluster }}@{{ k8s_cluster }}'
+        replace: "{{ k8s_cluster }}"

@@ -1,0 +1,35 @@
+---
+- name: 'Setup hosts.'
+  ansible.builtin.include_role:
+    name: 'lefford.pve_lxc'
+    tasks_from: 'setup.yaml'
+
+- name: 'Some universal setup.'
+  remote_user: 'root'
+  block:
+
+    - name: 'Perform normal setup.'
+      ansible.builtin.setup:
+
+    - name: 'General setup.'
+      ansible.builtin.include_role:
+        name: 'lefford.pve_lxc'
+        tasks_from: 'setup.yaml'
+
+    - name: 'Setup Kubernetes.'
+      ansible.builtin.include_tasks: 'setup_k8s.yaml'
+
+    - name: 'Label nodes.'
+      delegate_to: "{{ k8s_master }}"
+      kubernetes.core.k8s:
+        kubeconfig: '~/.kube/config'
+        state: 'present'
+        definition:
+          apiVersion: 'v1'
+          kind: 'Node'
+          metadata:
+            name: "{{ clean_hostname }}"
+            labels:
+              "pve_node": "{{ pve_node }}"
+              "k8s_cluster": "{{ k8s_cluster }}"
+              "k8s_role": "{{ pve_k8s_role }}"

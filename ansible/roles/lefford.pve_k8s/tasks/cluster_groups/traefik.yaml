@@ -1,0 +1,50 @@
+---
+- name: 'Add Traefik chart repository.'
+  kubernetes.core.helm_repository:
+    name: 'traefik'
+    repo_url: 'https://helm.traefik.io/traefik'
+
+- name: 'Deploy Traefik.'
+  kubernetes.core.helm:
+    name: 'traefik'
+    chart_ref: 'traefik/traefik'
+    release_namespace: 'traefik'
+    create_namespace: yes
+    values:
+      ingressClass:
+        enabled: yes
+        isDefaultClass: yes
+      providers:
+        kubernetesIngress:
+          enabled: yes
+          namespaces: []
+      logs:
+        general:
+          level: DEBUG
+        access:
+          enabled: yes
+      ports:
+        traefik:
+          port: 9000
+          expose: yes
+          exposedPort: 9000
+          protocol: 'TCP'
+        web:
+          port: 8000
+          expose: yes
+          exposedPort: 80
+          protocol: 'TCP'
+          nodePort: 32080
+        metrics:
+          port: 9100
+          expose: yes
+          exposedPort: 9100
+          protocol: 'TCP'
+      service:
+        enabled: true
+        type: 'NodePort'
+      rbac:
+        enabled: yes
+        namespaced: no
+      additionalArguments:
+        - '--providers.kubernetesingress.ingressendpoint.ip=127.0.0.1'

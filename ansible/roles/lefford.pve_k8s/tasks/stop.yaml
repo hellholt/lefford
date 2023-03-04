@@ -1,0 +1,5 @@
+---
+- name: 'Stop hosts.'
+  ansible.builtin.include_role:
+    name: 'hellholt.pve_lxc'
+    tasks_from: 'stop.yaml'

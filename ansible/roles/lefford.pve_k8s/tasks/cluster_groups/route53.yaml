@@ -1,0 +1,28 @@
+---
+- name: 'Create DNS records.'
+  delegate_to: 'localhost'
+  block:
+
+    - name: "Create privately-resolvable DNS records for the cluster."
+      community.aws.route53:
+        overwrite: yes
+        aws_access_key: "{{ aws_route53_access_key_id }}"
+        aws_secret_key: "{{ aws_route53_secret_access_key }}"
+        hosted_zone_id: "{{ route53_private_zone_id }}"
+        state: 'present'
+        type: 'A'
+        record: "{{ host_private_fqdn }}"
+        value: "{{ ipv4_address }}"
+
+    - name: "Create privately-resolvable wildcard DNS records for the cluster."
+      community.aws.route53:
+        alias: yes
+        alias_hosted_zone_id: "{{ route53_private_zone_id }}"
+        overwrite: yes
+        aws_access_key: "{{ aws_route53_access_key_id }}"
+        aws_secret_key: "{{ aws_route53_secret_access_key }}"
+        hosted_zone_id: "{{ route53_private_zone_id }}"
+        state: 'present'
+        type: 'A'
+        record: "*.{{ host_private_fqdn }}"
+        value: "{{ host_private_fqdn }}"

@@ -1,0 +1,13 @@
+---
+- name: 'Retrieve the Helm binary.'
+  ansible.builtin.shell:
+    cmd: |
+      curl -fsSL -o get_helm.sh 'https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3';
+      chmod 700 get_helm.sh;
+      ./get_helm.sh;
+    creates: '/usr/local/bin/helm'
+
+- name: 'Install the Helm diff plugin.'
+  kubernetes.core.helm_plugin:
+    plugin_path: 'https://github.com/databus23/helm-diff'
+    state: 'present'

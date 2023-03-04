@@ -1,0 +1,62 @@
+---
+- name: 'Set some facts.'
+  ansible.builtin.set_fact:
+    k8s_prometheus_private_fqdn: "prometheus.{{ host_private_fqdn }}"
+    k8s_prometheus_personal_fqdn: "prometheus.{{ host_personal_fqdn }}"
+    k8s_grafana_private_fqdn: "grafana.{{ host_private_fqdn }}"
+    k8s_grafana_personal_fqdn: "grafana.{{ host_personal_fqdn }}"
+
+- name: 'Add Prometheus Community chart repository.'
+  kubernetes.core.helm_repository:
+    name: 'prometheus-community'
+    repo_url: 'https://prometheus-community.github.io/helm-charts'
+
+- name: 'Deploy Kube-Prometheus-Stack.'
+  kubernetes.core.helm:
+    name: 'kube-prometheus-stack'
+    chart_ref: 'prometheus-community/kube-prometheus-stack'
+    release_namespace: 'kube-prometheus-stack'
+    create_namespace: yes
+    values:
+      grafana:
+        enabled: yes
+        namespaceOverride: ""
+        adminPassword: "{{ easy_password }}"
+        ingress:
+          enabled: yes
+          ingressClassName: 'traefik'
+          annotations: {}
+          labels: {}
+          hosts:
+            - "{{ k8s_grafana_private_fqdn }}"
+            - "{{ k8s_grafana_personal_fqdn }}"
+          paths:
+            - '/'
+          pathType: 'Prefix'
+      prometheus:
+        enabled: yes
+        ingress:
+          enabled: yes
+          ingressClassName: 'traefik'
+          annotations: {}
+          labels: {}
+          hosts:
+            - "{{ k8s_prometheus_private_fqdn }}"
+            - "{{ k8s_prometheus_personal_fqdn }}"
+          paths:
+            - '/'
+          pathType: 'Prefix'
+        serviceMonitor:
+          interval: ""
+          selfMonitor: yes
+          replicas: 1
+          podAntiAffinity: 'hard'
+          storageSpec:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: 'local-storage'
+                accessModes: ['ReadWriteOnce']
+                resources:
+                  requests:
+                    storage: 32Gi
+              selector: {}
